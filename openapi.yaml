@@ -1,0 +1,199 @@
+openapi: 3.0.0
+info:
+  title: Basic Calculator API
+  description: A simple REST API for performing basic arithmetic operations
+  version: 1.0.0
+  contact:
+    name: Calculator API Support
+    url: https://github.com/akshaypatange26/cap-calculator-program-v1
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+  - url: https://api.calculator.example.com
+    description: Production server
+
+paths:
+  /calculator/calculate:
+    post:
+      summary: Perform a calculation
+      description: Performs basic arithmetic operations (add, subtract, multiply, divide)
+      operationId: performCalculation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculationRequest'
+            examples:
+              addition:
+                summary: Add two numbers
+                value:
+                  operand1: 10
+                  operand2: 5
+                  operation: add
+              subtraction:
+                summary: Subtract two numbers
+                value:
+                  operand1: 10
+                  operand2: 3
+                  operation: subtract
+              multiplication:
+                summary: Multiply two numbers
+                value:
+                  operand1: 10
+                  operand2: 5
+                  operation: multiply
+              division:
+                summary: Divide two numbers
+                value:
+                  operand1: 20
+                  operand2: 4
+                  operation: divide
+      responses:
+        '200':
+          description: Calculation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationResponse'
+              examples:
+                success:
+                  value:
+                    operand1: 10
+                    operand2: 5
+                    operation: add
+                    result: 15
+        '400':
+          description: Invalid request - missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid operation. Supported operations are add, subtract, multiply, divide
+                code: INVALID_OPERATION
+        '409':
+          description: Division by zero error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Cannot divide by zero
+                code: DIVISION_BY_ZERO
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /calculator/health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the calculator service
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: UP
+                message: Calculator service is running
+
+components:
+  schemas:
+    CalculationRequest:
+      type: object
+      required:
+        - operand1
+        - operand2
+        - operation
+      properties:
+        operand1:
+          type: number
+          format: double
+          description: First operand (any real number)
+          example: 10
+        operand2:
+          type: number
+          format: double
+          description: Second operand (any real number)
+          example: 5
+        operation:
+          type: string
+          enum:
+            - add
+            - subtract
+            - multiply
+            - divide
+          description: The arithmetic operation to perform
+          example: add
+
+    CalculationResponse:
+      type: object
+      required:
+        - operand1
+        - operand2
+        - operation
+        - result
+      properties:
+        operand1:
+          type: number
+          format: double
+          description: First operand used in calculation
+          example: 10
+        operand2:
+          type: number
+          format: double
+          description: Second operand used in calculation
+          example: 5
+        operation:
+          type: string
+          enum:
+            - add
+            - subtract
+            - multiply
+            - divide
+          description: The operation that was performed
+          example: add
+        result:
+          type: number
+          format: double
+          description: The result of the calculation
+          example: 15
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message describing what went wrong
+          example: Invalid operation
+        code:
+          type: string
+          description: Error code for identifying the specific error
+          example: INVALID_OPERATION
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - UP
+            - DOWN
+          description: Service health status
+          example: UP
+        message:
+          type: string
+          description: Additional status information
+          example: Calculator service is running
