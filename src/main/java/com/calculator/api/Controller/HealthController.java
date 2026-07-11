@@ -1,21 +1,19 @@
-package com.calculator.api;
+package com.calculator.api.Controller;
 
-import com.calculator.model.HealthResponse;
-import com.calculator.utility.Constants;
+import com.calculator.api.utility.Constants;
+import com.calculator.model.HealthCheckResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
 public class HealthController {
 
-    @GetMapping("/health")
-    public ResponseEntity<HealthResponse> healthCheck() {
-
-        HealthResponse response = new HealthResponse();
-        response.setStatus(HealthResponse.StatusEnum.UP);
+    @GetMapping("/healthCheck")
+    public ResponseEntity<HealthCheckResponse> healthCheck() {
+        HealthCheckResponse response = new HealthCheckResponse();
+        response.setStatus(HealthCheckResponse.StatusEnum.UP);
         response.setMessage(Constants.HEALTH_STATUS_MESSAGE);
-
         return ResponseEntity.ok(response);
     }
 }

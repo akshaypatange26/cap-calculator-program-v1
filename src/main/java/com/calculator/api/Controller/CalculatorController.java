@@ -1,27 +1,24 @@
-package com.calculator.api;
+package com.calculator.api.Controller;
 
+import com.calculator.api.CalculatorApi;
+import com.calculator.api.service.CalculatorService;
 import com.calculator.model.CalculationRequest;
 import com.calculator.model.CalculationResponse;
-import com.calculator.service.CalculatorService;
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/calculator")
-public class CalculatorController {
-
+@RequiredArgsConstructor
+public class CalculatorController implements CalculatorApi {
+    
     private final CalculatorService calculatorService;
 
-    public CalculatorController(CalculatorService calculatorService) {
-        this.calculatorService = calculatorService;
-    }
+    @Override
+    public ResponseEntity<CalculationResponse> performCalculation(String xMessageId,
+                                                                  String xAppCorrelationId, String xConsumerType,
+                                                                  String xClientId, CalculationRequest calculationRequest) {
 
-    @PostMapping("/calculate")
-    public ResponseEntity<CalculationResponse> performCalculation(@Valid @RequestBody CalculationRequest calculationRequest) {
-
-        CalculationResponse response = calculatorService.performCalculation(calculationRequest);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(calculatorService.performCalculation(calculationRequest));
     }
 }

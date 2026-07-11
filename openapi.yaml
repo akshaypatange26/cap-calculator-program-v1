@@ -1,8 +1,14 @@
 openapi: 3.0.0
+
 info:
   title: Basic Calculator API
-  description: A simple REST API for performing basic arithmetic operations
-  version: 1.0.0
+  description: |
+    A REST API for performing basic arithmetic operations.
+
+    Resource:
+      1. Calculator provides arithmetic calculation capabilities
+         including addition, subtraction, multiplication and division.
+  version: 1.1.0
   contact:
     name: Calculator API Support
     url: https://github.com/akshaypatange26/cap-calculator-program-v1
@@ -10,15 +16,25 @@ info:
 servers:
   - url: http://localhost:8080/api
     description: Local development server
-  - url: https://api.calculator.example.com
-    description: Production server
+
+security:
+  - bearerAuth: [ ]
 
 paths:
   /calculator/calculate:
     post:
-      summary: Perform a calculation
-      description: Performs basic arithmetic operations (add, subtract, multiply, divide)
+      summary: Perform calculation
+      description: |
+        Performs arithmetic operations using supplied operands.
+        Supports add, subtract, multiply and divide operations.
       operationId: performCalculation
+
+      parameters:
+        - $ref: '#/components/parameters/MessageIdHeader'
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+        - $ref: '#/components/parameters/ConsumerTypeHeader'
+        - $ref: '#/components/parameters/ClientIdHeader'
+
       requestBody:
         required: true
         content:
@@ -27,29 +43,19 @@ paths:
               $ref: '#/components/schemas/CalculationRequest'
             examples:
               addition:
-                summary: Add two numbers
                 value:
-                  operand1: 10
-                  operand2: 5
+                  operands:
+                    operand1: 10
+                    operand2: 5
                   operation: add
-              subtraction:
-                summary: Subtract two numbers
-                value:
-                  operand1: 10
-                  operand2: 3
-                  operation: subtract
-              multiplication:
-                summary: Multiply two numbers
-                value:
-                  operand1: 10
-                  operand2: 5
-                  operation: multiply
+
               division:
-                summary: Divide two numbers
                 value:
-                  operand1: 20
-                  operand2: 4
+                  operands:
+                    operand1: 20
+                    operand2: 4
                   operation: divide
+
       responses:
         '200':
           description: Calculation successful
@@ -60,140 +66,249 @@ paths:
               examples:
                 success:
                   value:
-                    operand1: 10
-                    operand2: 5
-                    operation: add
-                    result: 15
+                    result:
+                      data:
+                        operands:
+                          operand1: 10
+                          operand2: 5
+                        operation: add
+                        value: 15
+
         '400':
-          description: Invalid request - missing or invalid parameters
+          description: Invalid request parameters or operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error: Invalid operation. Supported operations are add, subtract, multiply, divide
-                code: INVALID_OPERATION
-        '409':
-          description: Division by zero error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error: Cannot divide by zero
-                code: DIVISION_BY_ZERO
+              examples:
+                invalidHeader:
+                  value:
+                    result:
+                      errors:
+                        - code: "1001"
+                          message: Invalid Header Parameter
+                          details: Required header parameter is missing.
+
+                invalidBody:
+                  value:
+                    result:
+                      errors:
+                        - code: "1002"
+                          message: Invalid Body Parameter
+                          details: Operand values cannot be null.
+
+                invalidOperation:
+                  value:
+                    result:
+                      errors:
+                        - code: "1003"
+                          message: Invalid Operation
+                          details: Supported operations are add, subtract, multiply and divide.
+
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                hostUnavailable:
+                  value:
+                    result:
+                      errors:
+                        - code: "10001"
+                          message: Host Unavailable
+                          details: Unable to connect to downstream host.
 
-  /calculator/health:
+                providerTimeout:
+                  value:
+                    result:
+                      errors:
+                        - code: "10002"
+                          message: Provider Timeout
+                          details: Downstream provider did not respond.
+
+                processingError:
+                  value:
+                    result:
+                      errors:
+                        - code: "10003"
+                          message: Error in Processing
+                          details: Unexpected error occurred while processing request.
+
+  /healthCheck:
     get:
-      summary: Health check endpoint
-      description: Returns the health status of the calculator service
+      summary: Health check
+      description: Returns service availability status.
       operationId: healthCheck
+      security: [ ]
+
       responses:
         '200':
           description: Service is healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
-              example:
-                status: UP
-                message: Calculator service is running
+                $ref: '#/components/schemas/HealthCheckResponse'
+              examples:
+                success:
+                  value:
+                    status: UP
+                    message: Calculator service is running
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    MessageIdHeader:
+      name: x-messageId
+      in: header
+      required: true
+      description: Unique message identifier for request tracking
+      schema:
+        type: string
+        example: MSG-123456789
+
+    CorrelationIdHeader:
+      name: x-appCorrelationId
+      in: header
+      required: true
+      description: Application correlation identifier for end-to-end tracing
+      schema:
+        type: string
+        example: CORR-123456789
+
+    ConsumerTypeHeader:
+      name: x-consumerType
+      in: header
+      required: true
+      description: Type of consuming application
+      schema:
+        type: string
+        enum:
+          - MOBILE_APP
+          - WEB_APP
+          - INTERNAL_SYSTEM
+        example: WEB_APP
+
+    ClientIdHeader:
+      name: x-client-id
+      in: header
+      required: true
+      description: Client application identifier
+      schema:
+        type: string
+        example: calculator-ui
+
   schemas:
     CalculationRequest:
       type: object
       required:
-        - operand1
-        - operand2
+        - operands
         - operation
       properties:
-        operand1:
-          type: number
-          format: double
-          description: First operand (any real number)
-          example: 10
-        operand2:
-          type: number
-          format: double
-          description: Second operand (any real number)
-          example: 5
+        operands:
+          type: object
+          required:
+            - operand1
+            - operand2
+          properties:
+            operand1:
+              type: number
+              format: double
+              description: First operand
+              example: 10
+
+            operand2:
+              type: number
+              format: double
+              description: Second operand
+              example: 5
+
         operation:
           type: string
+          description: Arithmetic operation to perform
           enum:
             - add
             - subtract
             - multiply
             - divide
-          description: The arithmetic operation to perform
           example: add
 
     CalculationResponse:
       type: object
-      required:
-        - operand1
-        - operand2
-        - operation
-        - result
       properties:
-        operand1:
-          type: number
-          format: double
-          description: First operand used in calculation
-          example: 10
-        operand2:
-          type: number
-          format: double
-          description: Second operand used in calculation
-          example: 5
-        operation:
-          type: string
-          enum:
-            - add
-            - subtract
-            - multiply
-            - divide
-          description: The operation that was performed
-          example: add
         result:
-          type: number
-          format: double
-          description: The result of the calculation
-          example: 15
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                operands:
+                  type: object
+                  properties:
+                    operand1:
+                      type: number
+                      format: double
+                      example: 10
+
+                    operand2:
+                      type: number
+                      format: double
+                      example: 5
+
+                operation:
+                  type: string
+                  example: add
+
+                value:
+                  type: number
+                  format: double
+                  example: 15
 
     ErrorResponse:
       type: object
-      required:
-        - error
       properties:
-        error:
-          type: string
-          description: Error message describing what went wrong
-          example: Invalid operation
-        code:
-          type: string
-          description: Error code for identifying the specific error
-          example: INVALID_OPERATION
+        result:
+          type: object
+          properties:
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/Error'
 
-    HealthResponse:
+    Error:
       type: object
       required:
-        - status
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "1003"
+
+        message:
+          type: string
+          example: Invalid Operation
+
+        details:
+          type: string
+          example: Supported operations are add, subtract, multiply and divide.
+
+    HealthCheckResponse:
+      type: object
       properties:
         status:
           type: string
           enum:
             - UP
             - DOWN
-          description: Service health status
           example: UP
+
         message:
           type: string
-          description: Additional status information
           example: Calculator service is running

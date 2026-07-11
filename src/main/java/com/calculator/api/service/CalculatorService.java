@@ -1,37 +1,22 @@
-package com.calculator.service;
+package com.calculator.api.service;
 
+import com.calculator.api.processor.CalculatorProcessor;
+import com.calculator.api.utility.RequestValidator;
 import com.calculator.model.CalculationRequest;
 import com.calculator.model.CalculationResponse;
-import com.calculator.processor.CalculatorProcessor;
-import com.calculator.utility.Validator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CalculatorService {
 
     private final CalculatorProcessor calculatorProcessor;
+    private final RequestValidator requestValidator;
+    
+    public CalculationResponse performCalculation(CalculationRequest request) {
 
-    public CalculatorService(CalculatorProcessor calculatorProcessor) {
-        this.calculatorProcessor = calculatorProcessor;
-    }
-
-    public CalculationResponse performCalculation(
-            CalculationRequest calculationRequest) {
-        Validator.validate(calculationRequest);
-        double result = calculatorProcessor.calculate(calculationRequest);
-        CalculationResponse response = new CalculationResponse();
-        response.setOperand1(calculationRequest.getOperand1());
-        response.setOperand2(calculationRequest.getOperand2());
-        response.setOperation(
-                CalculationResponse.OperationEnum
-                        .fromValue(
-                                calculationRequest
-                                        .getOperation()
-                                        .getValue()
-                        )
-        );
-
-        response.setResult(result);
-        return response;
+        requestValidator.validate(request);
+        return calculatorProcessor.process(request);
     }
 }
