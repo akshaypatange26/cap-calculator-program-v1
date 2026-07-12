@@ -25,11 +25,14 @@ import static org.mockito.Mockito.mock;
 
 class GlobalExceptionHandlerTest {
 
+    private final com.calculator.api.repository.CalculationErrorLogRepository errorLogRepository =
+            mock(com.calculator.api.repository.CalculationErrorLogRepository.class);
+
     private GlobalExceptionHandler handler;
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler();
+        handler = new GlobalExceptionHandler(errorLogRepository);
     }
 
     @Test
