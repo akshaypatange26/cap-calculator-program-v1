@@ -171,7 +171,8 @@ components:
       description: Unique message identifier for request tracking
       schema:
         type: string
-        example: MSG-123456789
+        pattern: '^MSG-[0-9a-fA-F-]{36}$'
+        example: MSG-550e8400-e29b-41d4-a716-446655440000
 
     CorrelationIdHeader:
       name: x-appCorrelationId
@@ -180,7 +181,8 @@ components:
       description: Application correlation identifier for end-to-end tracing
       schema:
         type: string
-        example: CORR-123456789
+        format: uuid
+        example: 550e8400-e29b-41d4-a716-446655440000
 
     ConsumerTypeHeader:
       name: x-consumerType
@@ -202,6 +204,9 @@ components:
       description: Client application identifier
       schema:
         type: string
+        minLength: 3
+        maxLength: 50
+        pattern: '^[a-zA-Z0-9-_]+$'
         example: calculator-ui
 
   schemas:

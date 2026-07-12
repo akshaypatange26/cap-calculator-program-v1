@@ -1,15 +1,13 @@
 package com.calculator.api.utility;
 
-
 import com.calculator.model.CalculationRequest;
 import org.springframework.stereotype.Component;
-
 
 @Component
 public class RequestValidator {
 
-
     public void validate(CalculationRequest request) {
+
         if (request == null) {
             throw new IllegalArgumentException(Constants.NULL_REQUEST_DETAILS);
         }

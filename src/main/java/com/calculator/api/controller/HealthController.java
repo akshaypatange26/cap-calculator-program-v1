@@ -1,4 +1,4 @@
-package com.calculator.api.Controller;
+package com.calculator.api.controller;
 
 import com.calculator.api.utility.Constants;
 import com.calculator.model.HealthCheckResponse;
