@@ -82,7 +82,17 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -115,8 +125,8 @@
                         <exclude>com/calculator/model/**</exclude>
                         <exclude>com/calculator/api/CalculatorApi.class</exclude>
                         <exclude>com/calculator/api/HealthCheckApi.class</exclude>
-                        <exclude>com/calculator/api/ApiUtil.java</exclude>
-                        <exclude>com/calculator/api/utility/Constants.java</exclude>
+                        <exclude>com/calculator/api/ApiUtil.class</exclude>
+                        <exclude>com/calculator/api/utility/Constants.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
