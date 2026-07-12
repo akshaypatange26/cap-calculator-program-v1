@@ -1,7 +1,6 @@
 package com.calculator.api.exception;
 
-import com.calculator.api.entity.CalculationErrorLog;
-import com.calculator.api.repository.CalculationErrorLogRepository;
+import com.calculator.api.service.CalculationAuditLogger;
 import com.calculator.api.utility.Constants;
 import com.calculator.model.Error;
 import com.calculator.model.ErrorResponse;
@@ -9,6 +8,7 @@ import com.calculator.model.ErrorResponseResult;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -24,30 +24,25 @@ import java.util.List;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class GlobalExceptionHandler {
 
-    private final CalculationErrorLogRepository errorLogRepository;
+    private final CalculationAuditLogger calculationAuditLogger;
 
     private void saveErrorLog(String errorCode, String errorMessage, String errorDetails) {
         try {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest httpRequest = attributes.getRequest();
-                CalculationErrorLog errorLog = new CalculationErrorLog();
-                errorLog.setMessageId(httpRequest.getHeader(Constants.MESSAGE_ID_HEADER));
-                errorLog.setCorrelationId(httpRequest.getHeader(Constants.CORRELATION_ID_HEADER));
-                errorLog.setConsumerType(httpRequest.getHeader(Constants.CONSUMER_TYPE_HEADER));
-                errorLog.setClientId(httpRequest.getHeader(Constants.CLIENT_ID_HEADER));
+                String messageId = httpRequest.getHeader(Constants.MESSAGE_ID_HEADER);
+                String correlationId = httpRequest.getHeader(Constants.CORRELATION_ID_HEADER);
+                String consumerType = httpRequest.getHeader(Constants.CONSUMER_TYPE_HEADER);
+                String clientId = httpRequest.getHeader(Constants.CLIENT_ID_HEADER);
                 
-                errorLog.setErrorCode(errorCode);
-                errorLog.setErrorMessage(errorMessage);
-                errorLog.setErrorDetails(errorDetails);
-                
-                errorLogRepository.save(errorLog);
+                calculationAuditLogger.logError(errorCode, errorMessage, errorDetails, messageId, correlationId, consumerType, clientId);
             }
         } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class)
-                    .error("Failed to save calculation error log to database", e);
+            log.error("Failed to trigger calculation error logging", e);
         }
     }
 
