@@ -20,11 +20,14 @@ class CalculatorServiceTest {
     private final RequestValidator validator =
             Mockito.mock(RequestValidator.class);
 
+    private final com.calculator.api.repository.CalculationHistoryRepository historyRepository =
+            Mockito.mock(com.calculator.api.repository.CalculationHistoryRepository.class);
 
     private final CalculatorService service =
             new CalculatorService(
                     processor,
-                    validator
+                    validator,
+                    historyRepository
             );
 
 

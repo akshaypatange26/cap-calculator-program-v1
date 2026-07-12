@@ -1,11 +1,14 @@
 package com.calculator.api.exception;
 
+import com.calculator.api.entity.CalculationErrorLog;
+import com.calculator.api.repository.CalculationErrorLogRepository;
 import com.calculator.api.utility.Constants;
 import com.calculator.model.Error;
 import com.calculator.model.ErrorResponse;
 import com.calculator.model.ErrorResponseResult;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,12 +16,40 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final CalculationErrorLogRepository errorLogRepository;
+
+    private void saveErrorLog(String errorCode, String errorMessage, String errorDetails) {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest httpRequest = attributes.getRequest();
+                CalculationErrorLog errorLog = new CalculationErrorLog();
+                errorLog.setMessageId(httpRequest.getHeader(Constants.MESSAGE_ID_HEADER));
+                errorLog.setCorrelationId(httpRequest.getHeader(Constants.CORRELATION_ID_HEADER));
+                errorLog.setConsumerType(httpRequest.getHeader(Constants.CONSUMER_TYPE_HEADER));
+                errorLog.setClientId(httpRequest.getHeader(Constants.CLIENT_ID_HEADER));
+                
+                errorLog.setErrorCode(errorCode);
+                errorLog.setErrorMessage(errorMessage);
+                errorLog.setErrorDetails(errorDetails);
+                
+                errorLogRepository.save(errorLog);
+            }
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class)
+                    .error("Failed to save calculation error log to database", e);
+        }
+    }
 
     /*
      * Invalid JSON + Invalid Enum
@@ -26,8 +57,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         if (isInvalidOperation(ex)) {
+            saveErrorLog(Constants.INVALID_OPERATION_CODE, Constants.INVALID_OPERATION_MESSAGE, Constants.SUPPORTED_OPERATIONS_MESSAGE);
             return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_OPERATION_CODE, Constants.INVALID_OPERATION_MESSAGE, Constants.SUPPORTED_OPERATIONS_MESSAGE))));
         }
+        saveErrorLog(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, Constants.INVALID_JSON_DETAILS);
         return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, Constants.INVALID_JSON_DETAILS))));
     }
 
@@ -65,6 +98,7 @@ public class GlobalExceptionHandler {
                 case "operands.operand2" -> Constants.OPERAND2_REQUIRED_DETAILS;
                 default -> fieldError.getDefaultMessage();
             };
+            saveErrorLog(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, details);
             errors.add(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, details));
         });
         return ResponseEntity.badRequest().body(buildErrorResponse(errors));
@@ -75,17 +109,22 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        saveErrorLog(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage());
         return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage()))));
     }
 
     @ExceptionHandler(DivisionByZeroException.class)
     public ResponseEntity<ErrorResponse> handleDivisionByZero(DivisionByZeroException ex) {
+        saveErrorLog(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage());
         return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage()))));
     }
 
     @ExceptionHandler(InvalidHeaderException.class)
     public ResponseEntity<ErrorResponse> handleInvalidHeader(InvalidHeaderException ex) {
-        List<Error> errors = ex.getErrors().stream().map(error -> createError(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, error)).toList();
+        List<Error> errors = ex.getErrors().stream().map(error -> {
+            saveErrorLog(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, error);
+            return createError(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, error);
+        }).toList();
         return ResponseEntity.badRequest().body(buildErrorResponse(errors));
     }
 
@@ -101,12 +140,15 @@ public class GlobalExceptionHandler {
 
     private void validateHeader(HttpServletRequest request, String header, List<Error> errors) {
         if (request.getHeader(header) == null) {
-            errors.add(createError(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, Constants.MISSING_HEADER_DETAILS + header));
+            String details = Constants.MISSING_HEADER_DETAILS + header;
+            saveErrorLog(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, details);
+            errors.add(createError(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, details));
         }
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        saveErrorLog(Constants.PROCESSING_ERROR_CODE, Constants.PROCESSING_ERROR_MESSAGE, ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(List.of(createError(Constants.PROCESSING_ERROR_CODE, Constants.PROCESSING_ERROR_MESSAGE, ex.getMessage()))));
     }
 
