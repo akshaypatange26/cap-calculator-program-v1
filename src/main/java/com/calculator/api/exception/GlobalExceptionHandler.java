@@ -1,151 +1,128 @@
 package com.calculator.api.exception;
 
+import com.calculator.api.utility.Constants;
+import com.calculator.model.Error;
 import com.calculator.model.ErrorResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.calculator.model.ErrorResponseResult;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.calculator.utility.Constants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
-
-    /**
-     * Handles invalid JSON payloads and enum conversion errors.
-     * Example:
-     * {
-     *    "operation": "power"
-     * }
+    /*
+     * Invalid JSON + Invalid Enum
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex) {
-
-        String errorMessage = ex.getMostSpecificCause().getMessage();
-
-        ErrorResponse errorResponse = new ErrorResponse();
-
-        if (errorMessage != null && errorMessage.contains(Constants.OPERATION_ENUM_MESSAGE)) {
-            errorResponse.setError(
-                    Constants.SUPPORTED_OPERATIONS_MESSAGE
-            );
-            errorResponse.setCode(
-                    Constants.VALIDATION_ERROR
-            );
-        } else {
-            errorResponse.setError(Constants.INVALID_JSON_MESSAGE);
-            errorResponse.setCode(Constants.INVALID_JSON);
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        if (isInvalidOperation(ex)) {
+            return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_OPERATION_CODE, Constants.INVALID_OPERATION_MESSAGE, Constants.SUPPORTED_OPERATIONS_MESSAGE))));
         }
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(errorResponse);
+        return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, Constants.INVALID_JSON_DETAILS))));
     }
 
+    private boolean isInvalidOperation(HttpMessageNotReadableException ex) {
+        Throwable cause = ex;
+        while (cause != null) {
+            // OpenAPI generated enum failure
+            if (cause instanceof com.fasterxml.jackson.databind.exc.ValueInstantiationException) {
+                return true;
+            }
+            // Normal Jackson enum failure
+            if (cause instanceof InvalidFormatException invalidFormatException) {
+                return invalidFormatException.getTargetType().isEnum();
+            }
+            // Generated enum fromValue() throws IllegalArgumentException
+            if (cause instanceof IllegalArgumentException && cause.getMessage() != null && cause.getMessage().contains(Constants.UNEXPECTED_VALUE_DETAILS)) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
 
-    /**
-     * Handles OpenAPI generated Bean Validation failures.
-     * Example:
-     * Missing operand1, operand2, or operation
+    /*
+     * Bean validation errors
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            MethodArgumentNotValidException ex) {
-
-        String errorMessage = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error ->
-                        error.getField() + " " + error.getDefaultMessage())
-                .findFirst()
-                .orElse(Constants.VALIDATION_FAILED_MESSAGE);
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setError(errorMessage);
-        errorResponse.setCode(Constants.VALIDATION_ERROR);
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(errorResponse);
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        List<Error> errors = new ArrayList<>();
+        ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
+            String details = switch (fieldError.getField()) {
+                case "operation" -> Constants.OPERATION_REQUIRED_DETAILS;
+                case "operands" -> Constants.NULL_OPERANDS_DETAILS;
+                case "operands.operand1" -> Constants.OPERAND1_REQUIRED_DETAILS;
+                case "operands.operand2" -> Constants.OPERAND2_REQUIRED_DETAILS;
+                default -> fieldError.getDefaultMessage();
+            };
+            errors.add(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, details));
+        });
+        return ResponseEntity.badRequest().body(buildErrorResponse(errors));
     }
 
-
-    /**
-     * Handles business validation errors.
-     * Example:
-     * Divide operation with operand2 = 0
-     */
-    @ExceptionHandler(DivisionByZeroException.class)
-    public ResponseEntity<ErrorResponse> handleDivisionByZero(
-            DivisionByZeroException ex) {
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setError(ex.getMessage());
-        errorResponse.setCode(Constants.DIVISION_BY_ZERO);
-
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(errorResponse);
-    }
-
-
-    /**
-     * Handles other illegal requests.
+    /*
+     * Custom validator errors
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
-            IllegalArgumentException ex) {
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setError(ex.getMessage());
-        errorResponse.setCode(Constants.INVALID_REQUEST);
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(errorResponse);
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage()))));
     }
 
+    @ExceptionHandler(DivisionByZeroException.class)
+    public ResponseEntity<ErrorResponse> handleDivisionByZero(DivisionByZeroException ex) {
+        return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage()))));
+    }
 
-    /**
-     * Catch-all exception handler.
-     * Never expose internal exception details to API consumers.
-     */
+    @ExceptionHandler(InvalidHeaderException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidHeader(InvalidHeaderException ex) {
+        List<Error> errors = ex.getErrors().stream().map(error -> createError(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, error)).toList();
+        return ResponseEntity.badRequest().body(buildErrorResponse(errors));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorResponse> handleMissingHeader(MissingRequestHeaderException ex, HttpServletRequest request) {
+        List<Error> errors = new ArrayList<>();
+        validateHeader(request, Constants.MESSAGE_ID_HEADER, errors);
+        validateHeader(request, Constants.CORRELATION_ID_HEADER, errors);
+        validateHeader(request, Constants.CONSUMER_TYPE_HEADER, errors);
+        validateHeader(request, Constants.CLIENT_ID_HEADER, errors);
+        return ResponseEntity.badRequest().body(buildErrorResponse(errors));
+    }
+
+    private void validateHeader(HttpServletRequest request, String header, List<Error> errors) {
+        if (request.getHeader(header) == null) {
+            errors.add(createError(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, Constants.MISSING_HEADER_DETAILS + header));
+        }
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(
-            Exception ex) {
-
-        log.error(Constants.UNEXPECTED_ERROR_MESSAGE, ex);
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setError(Constants.INTERNAL_SERVER_ERROR_MESSAGE);
-        errorResponse.setCode(Constants.INTERNAL_ERROR);
-
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorResponse);
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(List.of(createError(Constants.PROCESSING_ERROR_CODE, Constants.PROCESSING_ERROR_MESSAGE, ex.getMessage()))));
     }
 
-    @ExceptionHandler(InvalidOperationException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidOperation(
-            InvalidOperationException ex) {
+    private Error createError(String code, String message, String details) {
+        Error error = new Error();
+        error.setCode(code);
+        error.setMessage(message);
+        error.setDetails(details);
+        return error;
+    }
 
-        ErrorResponse errorResponse = new ErrorResponse();
-
-        errorResponse.setError(ex.getMessage());
-        errorResponse.setCode(
-                Constants.VALIDATION_ERROR
-        );
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(errorResponse);
+    private ErrorResponse buildErrorResponse(List<Error> errors) {
+        ErrorResponseResult result = new ErrorResponseResult();
+        result.setErrors(errors);
+        ErrorResponse response = new ErrorResponse();
+        response.setResult(result);
+        return response;
     }
 }
