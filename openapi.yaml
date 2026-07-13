@@ -156,6 +156,68 @@ paths:
                     status: UP
                     message: Calculator service is running
 
+  /calculator/history:
+    get:
+      summary: Get calculation history
+      description: Returns a list of all calculation history records.
+      operationId: getCalculationHistory
+      responses:
+        '200':
+          description: List of calculation history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalculationHistoryRecord'
+        '401':
+          description: Unauthorized request
+
+  /calculator/errors:
+    get:
+      summary: Get calculation error logs
+      description: Returns a list of all logged system and request validation errors.
+      operationId: getCalculationErrors
+      responses:
+        '200':
+          description: List of calculation errors retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalculationErrorRecord'
+        '401':
+          description: Unauthorized request
+        '403':
+          description: Forbidden request (requires ADMIN role)
+
+  /users/register:
+    post:
+      summary: Register a new user
+      description: Creates a new user profile with ROLE_USER in the system.
+      operationId: registerUser
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistrationResponse'
+        '400':
+          description: Invalid request parameters or username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -317,3 +379,83 @@ components:
         message:
           type: string
           example: Calculator service is running
+
+    CalculationHistoryRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        messageId:
+          type: string
+        correlationId:
+          type: string
+        consumerType:
+          type: string
+        clientId:
+          type: string
+        operand1:
+          type: number
+          format: double
+        operand2:
+          type: number
+          format: double
+        operation:
+          type: string
+        resultValue:
+          type: number
+          format: double
+        createdAt:
+          type: string
+          format: date-time
+
+    CalculationErrorRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        messageId:
+          type: string
+        correlationId:
+          type: string
+        consumerType:
+          type: string
+        clientId:
+          type: string
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        errorDetails:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UserRegistrationRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9-_]+$'
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+
+    UserRegistrationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        message:
+          type: string

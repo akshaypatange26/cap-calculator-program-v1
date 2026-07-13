@@ -15,6 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(
             InterceptorRegistry registry) {
-        registry.addInterceptor(headerValidationInterceptor).addPathPatterns(Constants.PATH_PATTERNS);
+        registry.addInterceptor(headerValidationInterceptor)
+                .addPathPatterns(Constants.PATH_PATTERNS)
+                .excludePathPatterns("/calculator/history", "/calculator/errors");
     }
 }

@@ -18,7 +18,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/healthCheck", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
+                .requestMatchers("/healthCheck", "/api/healthCheck", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
+                .requestMatchers("/users/register", "/api/users/register").permitAll()
+                .requestMatchers("/calculator/errors", "/api/calculator/errors").hasRole("ADMIN")
+                .requestMatchers("/calculator/history", "/api/calculator/history").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
             )
             .httpBasic(Customizer.withDefaults());

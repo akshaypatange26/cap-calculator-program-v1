@@ -1,0 +1,1993 @@
+{
+  "collection": {
+    "info": {
+      "name": "Basic Calculator Local Test Suite",
+      "description": "Local test suite covering calculations, granular validations, history, error logs, and user registration.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+      "type": "basic",
+      "basic": [
+        {
+          "key": "username",
+          "value": "{{username}}",
+          "type": "string"
+        },
+        {
+          "key": "password",
+          "value": "{{password}}",
+          "type": "string"
+        }
+      ]
+    },
+    "event": [
+      {
+        "listen": "prerequest",
+        "script": {
+          "exec": [
+            "// Generate a fresh random username at the start of the run if not set",
+            "if (!pm.collectionVariables.has('dynamicUsername')) {",
+            "    pm.collectionVariables.set('dynamicUsername', 'apiUser_' + Math.floor(Math.random() * 1000000));",
+            "}"
+          ],
+          "type": "text/javascript"
+        }
+      }
+    ],
+    "variable": [
+      {
+        "key": "baseUrl",
+        "value": "http://localhost:8080"
+      },
+      {
+        "key": "username",
+        "value": "admin"
+      },
+      {
+        "key": "password",
+        "value": "password123"
+      }
+    ],
+    "item": [
+      {
+        "name": "1. Add",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"Addition result is correct (10 + 5 = 15)\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.data.value).to.eql(15);",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 1. Add"
+        }
+      },
+      {
+        "name": "2. Multiply",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"Multiplication result is correct (10 * 5 = 50)\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.data.value).to.eql(50);",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"multiply\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 2. Multiply"
+        }
+      },
+      {
+        "name": "3. Subtract",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"Subtraction result is correct (10 - 5 = 5)\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.data.value).to.eql(5);",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"subtract\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 3. Subtract"
+        }
+      },
+      {
+        "name": "4. Divide",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"Division result is correct (10 / 5 = 2)\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.data.value).to.eql(2);",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"divide\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 4. Divide"
+        }
+      },
+      {
+        "name": "5. Divide by 0",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error response is Division by Zero\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1002');",
+                "    pm.expect(jsonData.result.errors[0].message).to.eql('Invalid Body Parameter');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('zero');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 0\n  },\n  \"operation\": \"divide\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 5. Divide by 0"
+        }
+      },
+      {
+        "name": "6a. Missing x-messageId",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details x-messageId missing\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-messageId');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 6a. Missing x-messageId"
+        }
+      },
+      {
+        "name": "6b. Missing x-appCorrelationId",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details x-appCorrelationId missing\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-appCorrelationId');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 6b. Missing x-appCorrelationId"
+        }
+      },
+      {
+        "name": "6c. Missing x-consumerType",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details x-consumerType missing\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-consumerType');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 6c. Missing x-consumerType"
+        }
+      },
+      {
+        "name": "6d. Missing x-client-id",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details x-client-id missing\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-client-id');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 6d. Missing x-client-id"
+        }
+      },
+      {
+        "name": "7a. Invalid x-messageId",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details invalid x-messageId format\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-messageId');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "WRONG-MSG-ID-FORMAT"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 7a. Invalid x-messageId"
+        }
+      },
+      {
+        "name": "7b. Invalid x-appCorrelationId",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details invalid x-appCorrelationId UUID format\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-appCorrelationId');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "not-a-valid-uuid"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 7b. Invalid x-appCorrelationId"
+        }
+      },
+      {
+        "name": "7c. Invalid x-consumerType",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details invalid x-consumerType enum\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-consumerType');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WRONG_CONSUMER_ENUM"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 7c. Invalid x-consumerType"
+        }
+      },
+      {
+        "name": "7d. Invalid x-client-id",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details invalid x-client-id length\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1001');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('x-client-id');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "cl"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 7d. Invalid x-client-id"
+        }
+      },
+      {
+        "name": "7e. One missing header and wrong consumerType",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details lists both messageId missing and consumerType invalid\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    var details = jsonData.result.errors.map(e => e.details).join(', ');",
+                "    pm.expect(details.toLowerCase()).to.include('x-messageid');",
+                "    pm.expect(details.toLowerCase()).to.include('x-consumertype');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WRONG_CONSUMER_ENUM"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 7e. One missing header and wrong consumerType"
+        }
+      },
+      {
+        "name": "7f. Missing two headers",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details lists both missing headers\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    var details = jsonData.result.errors.map(e => e.details).join(', ');",
+                "    pm.expect(details.toLowerCase()).to.include('x-messageid');",
+                "    pm.expect(details.toLowerCase()).to.include('x-appcorrelationid');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 7f. Missing two headers"
+        }
+      },
+      {
+        "name": "8. Empty Request Body",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error indicates invalid body parameter\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1002');",
+                "    pm.expect(jsonData.result.errors[0].message).to.eql('Invalid Body Parameter');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 8. Empty Request Body"
+        }
+      },
+      {
+        "name": "9. Body is {}",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details report missing operands and operation\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    var details = jsonData.result.errors.map(e => e.details).join(', ');",
+                "    pm.expect(details.toLowerCase()).to.include('operands');",
+                "    pm.expect(details.toLowerCase()).to.include('operation');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 9. Body is {}"
+        }
+      },
+      {
+        "name": "10. Removing operands",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details report missing operands\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    var details = jsonData.result.errors.map(e => e.details).join(', ');",
+                "    pm.expect(details.toLowerCase()).to.include('operands');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 10. Removing operands"
+        }
+      },
+      {
+        "name": "11. Removing operand1",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details report missing operand1\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    var details = jsonData.result.errors.map(e => e.details).join(', ');",
+                "    pm.expect(details.toLowerCase()).to.include('operand1');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand2\": 5\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 11. Removing operand1"
+        }
+      },
+      {
+        "name": "12. Removing operand2",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details report missing operand2\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    var details = jsonData.result.errors.map(e => e.details).join(', ');",
+                "    pm.expect(details.toLowerCase()).to.include('operand2');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10\n  },\n  \"operation\": \"add\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 12. Removing operand2"
+        }
+      },
+      {
+        "name": "13. Removing operation",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details report missing operation\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    var details = jsonData.result.errors.map(e => e.details).join(', ');",
+                "    pm.expect(details.toLowerCase()).to.include('operation');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  }\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 13. Removing operation"
+        }
+      },
+      {
+        "name": "14. Pass wrong operation",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error details report invalid operation value\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].code).to.eql('1003');",
+                "    pm.expect(jsonData.result.errors[0].message).to.eql('Invalid Operation');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "x-messageId",
+              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-appCorrelationId",
+              "value": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "key": "x-consumerType",
+              "value": "WEB_APP"
+            },
+            {
+              "key": "x-client-id",
+              "value": "calculator-ui"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"operands\": {\n    \"operand1\": 10,\n    \"operand2\": 5\n  },\n  \"operation\": \"mod\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/calculate",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "calculate"
+            ]
+          },
+          "description": "Test request: 14. Pass wrong operation"
+        }
+      },
+      {
+        "name": "15. User Registration",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"User registered successfully\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.username).to.eql(pm.collectionVariables.get('dynamicUsername'));",
+                "    pm.expect(jsonData.message).to.eql('User registered successfully');",
+                "    pm.expect(jsonData.id).to.be.a('number');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\"username\":\"{{dynamicUsername}}\",\"password\":\"Password123\"}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/users/register",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "users",
+              "register"
+            ]
+          },
+          "description": "Custom test request: 15. User Registration",
+          "auth": {
+            "type": "noauth"
+          }
+        }
+      },
+      {
+        "name": "16. User Registration - Duplicate Username",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 400\", function () {",
+                "    pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test(\"Error shows username already exists\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.result.errors[0].message).to.eql('Invalid Body Parameter');",
+                "    pm.expect(jsonData.result.errors[0].details).to.include('already exists');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\"username\":\"{{dynamicUsername}}\",\"password\":\"Password123\"}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "url": {
+            "raw": "{{baseUrl}}/users/register",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "users",
+              "register"
+            ]
+          },
+          "description": "Custom test request: 16. User Registration - Duplicate Username",
+          "auth": {
+            "type": "noauth"
+          }
+        }
+      },
+      {
+        "name": "17. Get History - Success (ADMIN)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"History returned as array\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData).to.be.an('array');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/history",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "history"
+            ]
+          },
+          "description": "Custom test request: 17. Get History - Success (ADMIN)",
+          "auth": {
+            "type": "basic",
+            "basic": [
+              {
+                "key": "username",
+                "value": "admin",
+                "type": "string"
+              },
+              {
+                "key": "password",
+                "value": "password123",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "18. Get History - Success (Registered User)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"History returned as array\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData).to.be.an('array');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/history",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "history"
+            ]
+          },
+          "description": "Custom test request: 18. Get History - Success (Registered User)",
+          "auth": {
+            "type": "basic",
+            "basic": [
+              {
+                "key": "username",
+                "value": "{{dynamicUsername}}",
+                "type": "string"
+              },
+              {
+                "key": "password",
+                "value": "Password123",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "19. Get Errors - Success (ADMIN)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"Errors returned as array\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData).to.be.an('array');",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/errors",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "errors"
+            ]
+          },
+          "description": "Custom test request: 19. Get Errors - Success (ADMIN)",
+          "auth": {
+            "type": "basic",
+            "basic": [
+              {
+                "key": "username",
+                "value": "admin",
+                "type": "string"
+              },
+              {
+                "key": "password",
+                "value": "password123",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "20. Get Errors - Forbidden (Registered User)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 403\", function () {",
+                "    pm.response.to.have.status(403);",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/errors",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "errors"
+            ]
+          },
+          "description": "Custom test request: 20. Get Errors - Forbidden (Registered User)",
+          "auth": {
+            "type": "basic",
+            "basic": [
+              {
+                "key": "username",
+                "value": "{{dynamicUsername}}",
+                "type": "string"
+              },
+              {
+                "key": "password",
+                "value": "Password123",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "21. Get History - Unauthorized",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 401\", function () {",
+                "    pm.response.to.have.status(401);",
+                "});",
+                "",
+                "// Clear dynamicUsername at the end of the run",
+                "pm.collectionVariables.unset('dynamicUsername');"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Accept",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          },
+          "url": {
+            "raw": "{{baseUrl}}/calculator/history",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "calculator",
+              "history"
+            ]
+          },
+          "description": "Custom test request: 21. Get History - Unauthorized",
+          "auth": {
+            "type": "basic",
+            "basic": [
+              {
+                "key": "username",
+                "value": "wrongUser",
+                "type": "string"
+              },
+              {
+                "key": "password",
+                "value": "wrongPass",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
