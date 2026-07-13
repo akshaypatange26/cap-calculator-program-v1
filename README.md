@@ -23,59 +23,188 @@ to separate auditing tables.
 
 ---
 
-## 🗺️ Application Flow Diagram
+## 🗺️ Application Flow Diagrams
 
-The text-based flow diagram below outlines the lifecycle of a request, detailing the validation path, the processing
-logic, and the asynchronous auditing/logging mechanism:
+Each resource has its own request lifecycle. All requests pass through **Spring Security** first, then are routed to their respective flow.
+
+---
+
+### 1️⃣ POST /calculator/calculate — Arithmetic Calculation
 
 ```text
-           +---------------------------------------------+
-           |                   Client                    |
-           +---------------------------------------------+
-                                  |
-                                  v
-           +---------------------------------------------+
-           |            Spring Security Filter           |
-           +---------------------------------------------+
-            /                                           \
-    [Fail] /                                             \ [Pass]
-          v                                               v
-    +-------------+                       +-----------------------------+
-    | 401 response|                       | HeaderValidationInterceptor |
-    +-------------+                       | (skipped for GET endpoints) |
-                                          +-----------------------------+
-                                            /                         \
-                                    [Fail] /                           \ [Pass]
-                                          v                             v
-                                  +--------------+             +------------------+
-                                  | Global Error |             | RequestValidator  |
-                                  |   Handler    |             +------------------+
-                                  +--------------+               /              \
-                                         |               [Fail] /                \ [Pass]
-                                         v                     v                  v
-                                  +--------------+      +--------------+   +-------------+
-                                  | Async Logger |      | Global Error |   | Calculator  |
-                                  |  (logError)  |      |   Handler    |   |  Processor  |
-                                  +--------------+      +--------------+   +-------------+
-                                         |                     |                  |
-                                         v                     v                  v
-                                  +--------------+      +--------------+   +-------------+
-                                  | Error Log in |      | Async Logger |   | 200 Success |
-                                  |  Oracle DB   |      |  (logError)  |   |  Response   |
-                                  +--------------+      +--------------+   +-------------+
-                                                               |                  |
-                                                               v                  v
-                                                        +--------------+   +-------------+
-                                                        | Error Log in |   | Async Logger|
-                                                        |  Oracle DB   |   | (logSuccess)|
-                                                        +--------------+   +-------------+
-                                                                                  |
-                                                                                  v
-                                                                           +-------------+
-                                                                           | History Log |
-                                                                           |  in Oracle  |
-                                                                           +-------------+
+Client
+  │
+  ▼
+Spring Security Filter (HTTP Basic Auth against CALCULATOR_USERS)
+  │
+  ├── [401] ──► 401 Unauthorized Response
+  │
+  └── [Pass]
+        │
+        ▼
+    HeaderValidationInterceptor
+    (validates x-messageId, x-appCorrelationId, x-consumerType, x-client-id)
+        │
+        ├── [Invalid/Missing] ──► GlobalExceptionHandler
+        │                               │
+        │                               ▼
+        │                         Async Error Logger ──► CALCULATION_ERROR_LOG (Oracle DB)
+        │                               │
+        │                               ▼
+        │                         400 Bad Request (error code 1001)
+        │
+        └── [Pass]
+              │
+              ▼
+          RequestValidator
+          (validates operands, operation enum)
+              │
+              ├── [Invalid] ──► GlobalExceptionHandler
+              │                       │
+              │                       ▼
+              │                 Async Error Logger ──► CALCULATION_ERROR_LOG (Oracle DB)
+              │                       │
+              │                       ▼
+              │                 400 Bad Request (error code 1002 / 1003)
+              │
+              └── [Valid]
+                    │
+                    ▼
+                CalculatorProcessor
+                (performs arithmetic)
+                    │
+                    ├── [Division by Zero] ──► GlobalExceptionHandler
+                    │                               │
+                    │                               ▼
+                    │                         Async Error Logger ──► CALCULATION_ERROR_LOG (Oracle DB)
+                    │                               │
+                    │                               ▼
+                    │                         400 Bad Request (error code 1002)
+                    │
+                    └── [Success]
+                          │
+                          ▼
+                      Async Audit Logger ──► CALCULATION_HISTORY (Oracle DB)
+                          │
+                          ▼
+                      200 OK (result with operands, operation, value)
 ```
+
+---
+
+### 2️⃣ POST /users/register — User Registration
+
+```text
+Client
+  │
+  ▼
+Spring Security Filter
+  │
+  └── [Permit All — no auth required]
+        │
+        ▼
+    UserRegistrationController
+        │
+        ▼
+    UserService
+    (checks for duplicate username)
+        │
+        ├── [Username Exists] ──► GlobalExceptionHandler (IllegalArgumentException)
+        │                               │
+        │                               ▼
+        │                         Async Error Logger ──► CALCULATION_ERROR_LOG (Oracle DB)
+        │                               │
+        │                               ▼
+        │                         400 Bad Request ("Username already exists")
+        │
+        └── [Username Available]
+              │
+              ▼
+          BCrypt Password Encoding
+              │
+              ▼
+          Save to CALCULATOR_USERS (role = USER, enabled = 1)
+              │
+              ▼
+          200 OK (id, username, message: "User registered successfully")
+```
+
+---
+
+### 3️⃣ GET /calculator/history — Calculation History
+
+```text
+Client
+  │
+  ▼
+Spring Security Filter (HTTP Basic Auth against CALCULATOR_USERS)
+  │
+  ├── [401] ──► 401 Unauthorized Response
+  │
+  └── [Pass]
+        │
+        ▼
+    Role Check (USER or ADMIN required)
+        │
+        ├── [403] ──► 403 Forbidden Response
+        │
+        └── [Pass]
+              │
+              ▼
+          HeaderValidationInterceptor
+          (SKIPPED — excluded path for GET endpoints)
+              │
+              ▼
+          CalculatorController → HistoryService
+              │
+              ▼
+          Query CALCULATION_HISTORY table (findAll)
+              │
+              ▼
+          Map Entity → CalculationHistoryRecord DTO
+              │
+              ▼
+          200 OK (array of history records)
+```
+
+---
+
+### 4️⃣ GET /calculator/errors — Audit Error Logs
+
+```text
+Client
+  │
+  ▼
+Spring Security Filter (HTTP Basic Auth against CALCULATOR_USERS)
+  │
+  ├── [401] ──► 401 Unauthorized Response
+  │
+  └── [Pass]
+        │
+        ▼
+    Role Check (ADMIN only)
+        │
+        ├── [403] ──► 403 Forbidden Response (USER role rejected)
+        │
+        └── [Pass — ADMIN only]
+              │
+              ▼
+          HeaderValidationInterceptor
+          (SKIPPED — excluded path for GET endpoints)
+              │
+              ▼
+          CalculatorController → HistoryService
+              │
+              ▼
+          Query CALCULATION_ERROR_LOG table (findAll)
+              │
+              ▼
+          Map Entity → CalculationErrorRecord DTO
+              │
+              ▼
+          200 OK (array of error log records)
+```
+
 
 ---
 
