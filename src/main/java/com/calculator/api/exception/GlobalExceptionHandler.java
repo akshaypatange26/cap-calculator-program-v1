@@ -52,9 +52,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         if (isInvalidOperation(ex)) {
+            log.warn("Invalid operation requested: {}", ex.getMessage());
             saveErrorLog(Constants.INVALID_OPERATION_CODE, Constants.INVALID_OPERATION_MESSAGE, Constants.SUPPORTED_OPERATIONS_MESSAGE);
             return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_OPERATION_CODE, Constants.INVALID_OPERATION_MESSAGE, Constants.SUPPORTED_OPERATIONS_MESSAGE))));
         }
+        log.warn("Invalid JSON or body format: {}", ex.getMessage());
         saveErrorLog(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, Constants.INVALID_JSON_DETAILS);
         return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, Constants.INVALID_JSON_DETAILS))));
     }
@@ -84,6 +86,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        log.warn("Payload validation failed for field: {}", ex.getBindingResult().getFieldErrors());
         List<Error> errors = new ArrayList<>();
         ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
             String details = switch (fieldError.getField()) {
@@ -104,18 +107,21 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        log.warn("Illegal argument in request processing: {}", ex.getMessage());
         saveErrorLog(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage());
         return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage()))));
     }
 
     @ExceptionHandler(DivisionByZeroException.class)
     public ResponseEntity<ErrorResponse> handleDivisionByZero(DivisionByZeroException ex) {
+        log.warn("Division by zero requested: {}", ex.getMessage());
         saveErrorLog(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage());
         return ResponseEntity.badRequest().body(buildErrorResponse(List.of(createError(Constants.INVALID_BODY_CODE, Constants.INVALID_BODY_MESSAGE, ex.getMessage()))));
     }
 
     @ExceptionHandler(InvalidHeaderException.class)
     public ResponseEntity<ErrorResponse> handleInvalidHeader(InvalidHeaderException ex) {
+        log.warn("Invalid HTTP headers detected: {}", ex.getErrors());
         List<Error> errors = ex.getErrors().stream().map(error -> {
             saveErrorLog(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, error);
             return createError(Constants.INVALID_HEADER_CODE, Constants.INVALID_HEADER_MESSAGE, error);
@@ -125,6 +131,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ErrorResponse> handleMissingHeader(MissingRequestHeaderException ex, HttpServletRequest request) {
+        log.warn("Missing required request header: {}", ex.getMessage());
         List<Error> errors = new ArrayList<>();
         validateHeader(request, Constants.MESSAGE_ID_HEADER, errors);
         validateHeader(request, Constants.CORRELATION_ID_HEADER, errors);
@@ -143,6 +150,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        log.error("Internal processing error occurred: ", ex);
         saveErrorLog(Constants.PROCESSING_ERROR_CODE, Constants.PROCESSING_ERROR_MESSAGE, ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(List.of(createError(Constants.PROCESSING_ERROR_CODE, Constants.PROCESSING_ERROR_MESSAGE, ex.getMessage()))));
     }

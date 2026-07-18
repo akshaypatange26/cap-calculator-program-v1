@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Include standard Spring Boot Logback configurations -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <!-- Bind Spring properties to Logback variables -->
+    <springProperty scope="context" name="seqUrl" source="logging.seq.url" defaultValue="http://localhost:5341" />
+    <springProperty scope="context" name="seqApiKey" source="logging.seq.api-key" />
+
+    <!-- Configure custom Seq Appender -->
+    <appender name="SEQ" class="com.calculator.api.logging.SeqAppender">
+        <serverUrl>${seqUrl}</serverUrl>
+        <apiKey>${seqApiKey}</apiKey>
+    </appender>
+
+    <!-- Set Root logger to log to console and local Seq -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="SEQ" />
+    </root>
+</configuration>

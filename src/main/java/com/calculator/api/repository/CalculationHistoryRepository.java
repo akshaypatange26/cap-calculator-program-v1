@@ -4,6 +4,9 @@ import com.calculator.api.entity.CalculationHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+
 @Repository
 public interface CalculationHistoryRepository extends JpaRepository<CalculationHistory, Long> {
+    int deleteByCreatedAtBefore(LocalDateTime threshold);
 }

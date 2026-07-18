@@ -50,6 +50,41 @@
     ],
     "item": [
       {
+        "name": "0. Health Check",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test(\"Health status is UP\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.status).to.eql(\"UP\");",
+                "});"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/healthCheck",
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "path": [
+              "healthCheck"
+            ]
+          },
+          "description": "Test request: 0. Health Check"
+        }
+      },
+      {
         "name": "1. Add",
         "event": [
           {
@@ -74,11 +109,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -144,11 +179,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -214,11 +249,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -284,11 +319,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -356,11 +391,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -427,7 +462,7 @@
           "header": [
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -494,7 +529,7 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -561,11 +596,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-client-id",
@@ -628,11 +663,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -699,7 +734,7 @@
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -766,7 +801,7 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
@@ -837,11 +872,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -908,11 +943,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -980,7 +1015,7 @@
           "header": [
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -1111,11 +1146,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -1178,11 +1213,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -1249,11 +1284,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -1320,11 +1355,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -1391,11 +1426,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -1462,11 +1497,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
@@ -1533,11 +1568,11 @@
           "header": [
             {
               "key": "x-messageId",
-              "value": "MSG-550e8400-e29b-41d4-a716-446655440000"
+              "value": "MSG-{{$guid}}"
             },
             {
               "key": "x-appCorrelationId",
-              "value": "550e8400-e29b-41d4-a716-446655440000"
+              "value": "{{$guid}}"
             },
             {
               "key": "x-consumerType",
