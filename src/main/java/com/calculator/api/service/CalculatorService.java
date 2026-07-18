@@ -34,7 +34,7 @@ public class CalculatorService {
             String correlationId = httpRequest.getHeader(Constants.CORRELATION_ID_HEADER);
             String consumerType = httpRequest.getHeader(Constants.CONSUMER_TYPE_HEADER);
             String clientId = httpRequest.getHeader(Constants.CLIENT_ID_HEADER);
-            // test commit
+
             calculationAuditLogger.logSuccess(request, response, messageId, correlationId, consumerType, clientId);
         }
     }
