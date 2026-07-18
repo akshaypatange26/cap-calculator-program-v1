@@ -18,7 +18,7 @@ public class CalculatorService {
     private final CalculatorProcessor calculatorProcessor;
     private final RequestValidator requestValidator;
     private final CalculationAuditLogger calculationAuditLogger;
-    
+
     public CalculationResponse performCalculation(CalculationRequest request) {
         requestValidator.validate(request);
         CalculationResponse response = calculatorProcessor.process(request);
@@ -34,7 +34,7 @@ public class CalculatorService {
             String correlationId = httpRequest.getHeader(Constants.CORRELATION_ID_HEADER);
             String consumerType = httpRequest.getHeader(Constants.CONSUMER_TYPE_HEADER);
             String clientId = httpRequest.getHeader(Constants.CLIENT_ID_HEADER);
-            
+            // test commit
             calculationAuditLogger.logSuccess(request, response, messageId, correlationId, consumerType, clientId);
         }
     }
